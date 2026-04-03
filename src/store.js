@@ -106,6 +106,19 @@ async function getNote(noteId) {
   return state.notes.find((note) => note.id === noteId) || null;
 }
 
+async function setLastOpenNote(noteId) {
+  const state = await loadState();
+
+  if (noteId && !state.notes.some((note) => note.id === noteId)) {
+    throw new Error("Note not found");
+  }
+
+  state.lastOpenNoteId = noteId || null;
+  await saveState(state);
+
+  return state.lastOpenNoteId;
+}
+
 async function createNote(title = "Untitled note") {
   const state = await loadState();
   const now = new Date().toISOString();
@@ -156,8 +169,22 @@ async function saveNote(noteId, updates) {
     throw new Error("Note not found");
   }
 
-  note.title = (updates.title || note.title || "Untitled note").trim() || "Untitled note";
-  note.content = updates.content ?? note.content;
+  const nextTitle = (updates.title || note.title || "Untitled note").trim() || "Untitled note";
+  const nextContent = updates.content ?? note.content;
+  const expectedUpdatedAt = typeof updates.expectedUpdatedAt === "string"
+    ? updates.expectedUpdatedAt
+    : null;
+  const hasRealChange = nextTitle !== note.title || nextContent !== note.content;
+
+  if (expectedUpdatedAt && hasRealChange && note.updatedAt !== expectedUpdatedAt) {
+    const error = new Error("This note changed on another device");
+    error.code = "CONFLICT";
+    error.latestNote = { ...note };
+    throw error;
+  }
+
+  note.title = nextTitle;
+  note.content = nextContent;
   note.updatedAt = new Date().toISOString();
   state.lastOpenNoteId = note.id;
 
@@ -246,5 +273,6 @@ module.exports = {
   importBackup,
   listNotes,
   loadState,
-  saveNote
+  saveNote,
+  setLastOpenNote
 };

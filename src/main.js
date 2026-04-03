@@ -3,10 +3,15 @@ const fs = require("fs/promises");
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 
 const store = require("./store");
+const { createSyncPadServer, getClientOrigin } = require("./server");
 
 app.disableHardwareAcceleration();
 
-function createWindow() {
+let embeddedServerHandle = null;
+const embeddedHost = process.env.SYNC_PAD_HOST || "127.0.0.1";
+const embeddedPort = Number(process.env.SYNC_PAD_PORT || 3210);
+
+function createWindow(origin) {
   const window = new BrowserWindow({
     width: 1280,
     height: 860,
@@ -21,12 +26,12 @@ function createWindow() {
     }
   });
 
-  window.loadFile(path.join(__dirname, "renderer", "index.html"));
+  window.loadURL(origin);
 }
 
 ipcMain.handle("app:status", async () => ({
   ...(await store.getStatus()),
-  sync: "Local only"
+  sync: embeddedHost === "127.0.0.1" ? "Local-only desktop app" : "Private Tailscale sync app"
 }));
 
 ipcMain.handle("notes:list", () => store.listNotes());
@@ -77,12 +82,17 @@ ipcMain.handle("backup:import", async () => {
   };
 });
 
-app.whenReady().then(() => {
-  createWindow();
+app.whenReady().then(async () => {
+  embeddedServerHandle = await createSyncPadServer({
+    host: embeddedHost,
+    port: embeddedPort
+  }).start();
+
+  createWindow(getClientOrigin(embeddedHost, embeddedServerHandle.port));
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
+      createWindow(getClientOrigin(embeddedHost, embeddedServerHandle.port));
     }
   });
 });
@@ -91,4 +101,16 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
   }
+});
+
+app.on("before-quit", async (event) => {
+  if (!embeddedServerHandle) {
+    return;
+  }
+
+  event.preventDefault();
+  const activeHandle = embeddedServerHandle;
+  embeddedServerHandle = null;
+  await activeHandle.stop();
+  app.quit();
 });

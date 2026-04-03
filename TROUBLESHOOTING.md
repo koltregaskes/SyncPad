@@ -4,11 +4,20 @@
 
 - Make sure dependencies are installed with `npm.cmd install`
 - Re-run `npm.cmd run check` to catch syntax problems quickly
+- If the desktop shell is the problem, try `npm.cmd run serve` first to confirm the private web app still starts cleanly
 
 ## Notes are not appearing
 
 - Run `npm.cmd run smoke-store`
+- Run `npm.cmd run smoke-server`
 - Check that the local data directory is writable
+
+## Another device cannot reach SyncPad
+
+- Confirm you started SyncPad on your Tailscale IP, not only on `127.0.0.1`
+- Confirm the host machine is still running SyncPad
+- Open the exact URL shown by SyncPad, for example `http://100.119.231.37:3210/`
+- Confirm Tailscale is connected on both devices
 
 ## Backup import issues
 
@@ -29,3 +38,9 @@ You can override that root with `MYDATA_DIR`.
 - Close any stuck Electron processes
 - Start the app again with `npm.cmd start`
 - SyncPad already disables hardware acceleration to avoid the GPU launch crash seen on some Windows machines
+
+## A note changed on another device while I was typing
+
+- SyncPad protects your work by creating a `conflict copy`
+- The newer remote version stays in place
+- Your unsaved local edit is kept as a separate note so nothing is silently lost

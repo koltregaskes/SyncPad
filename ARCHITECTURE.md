@@ -2,12 +2,12 @@
 
 ## Current Shape
 
-The first implementation is intentionally small:
+The current implementation has two front doors over one shared store:
 
 - Electron desktop shell
+- Private web client served by a small Node HTTP server
 - Local JSON storage under `LOCALAPPDATA\MyData\SyncPad`
-- Renderer UI for note list, search, and editing
-- IPC bridge between the renderer and the local store
+- Server-Sent Events for live note refresh across connected devices
 
 ## Storage Model
 
@@ -32,20 +32,38 @@ Each note contains:
 - `createdAt`
 - `updatedAt`
 
+## Server Model
+
+`src/server.js` serves:
+
+- the browser client from `src/renderer`
+- `/api/notes` endpoints for CRUD
+- `/api/backup` endpoints for export and import
+- `/api/events` for live updates
+- `/api/status` for client status and hosting details
+
+By default the server binds to:
+
+- `127.0.0.1:3210`
+
+but it can instead bind to a Tailscale IP such as:
+
+- `100.119.231.37:3210`
+
 ## Why This Direction
 
 - Fast to start
 - Good fit for Windows desktop use
-- Keeps the app offline-first
-- Leaves a clean place to add sync later without rebuilding the whole app
+- Also works well from Safari on iPad or a browser on another Windows machine
+- Keeps the app local-first and private
+- Leaves room for richer sync without rebuilding everything
 
-## Future Sync Layer
+## Sync Safety
 
-The sync layer should eventually:
+SyncPad currently uses a lightweight safe-write model:
 
-- upload note changes from the local store
-- pull remote updates down to the local store
-- handle conflicts safely
-- expose sync state in the UI
+- clients save against the note timestamp they last loaded
+- if another device changed that note first, the save is rejected
+- the client then creates a conflict copy so the local edit is still preserved
 
-That work is intentionally deferred until the local note experience feels right.
+This is intentionally simpler than a full collaborative editor, but it is much safer than silent last-write-wins overwrites.

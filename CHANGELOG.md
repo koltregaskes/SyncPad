@@ -14,3 +14,14 @@
 - Added backup export and import inside the app
 - Added live word and character counts in the editor footer
 - Disabled hardware acceleration to avoid Electron GPU launch crashes on this Windows setup
+
+## 0.3.0
+
+- Added a private HTTP server and browser client for live SyncPad access
+- Added live note refresh over Server-Sent Events
+- Added markdown preview with edit, split, and preview modes
+- Added find and replace tools
+- Added word wrap and zoom controls
+- Added Tailscale-friendly hosting support
+- Added conflict-safe saves that preserve local edits as conflict copies
+- Added server smoke testing and a Tailscale launch helper

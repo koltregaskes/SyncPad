@@ -1,80 +1,112 @@
 # SyncPad
 
-`SyncPad` is a desktop-first notes app for Windows with local storage today and a future cloud sync path.
+`SyncPad` is a local-first notes app that now works in two ways:
 
-The goal is straightforward: something that feels as quick and lightweight as Notepad, but keeps notes synced between machines automatically.
+- a desktop Electron shell for your main Windows machine
+- a private web app that can sync live across your own devices over Tailscale
+
+The goal is straightforward: something that feels as quick and lightweight as Notepad, but stays in sync across your own machines without pushing your notes onto the public web.
 
 ## Product Idea
 
-- Desktop-first, not web-first
-- Fast note editing with minimal friction
-- Local files or local cache first
-- Background cloud sync between Windows devices
-- Simple enough to live open all day
+- Local-first notes that stay fast even on one machine
+- Private live sync when you choose to expose the app on your own tailnet
+- A simple browser client that also works well on iPad
+- Markdown-friendly writing with preview, not heavy document tooling
+- Simple enough to leave open all day
 
 ## Intended User Experience
 
 - Open the app and start typing immediately
-- Notes autosave locally
-- Changes sync quietly in the background
-- The same notes appear on another machine after sync
-- No heavy workspace or document-management overhead
+- Notes autosave into a local JSON store
+- The desktop app and the browser client talk to the same private note server
+- Changes appear on connected devices almost immediately through live updates
+- No account system or public cloud is required
 
 ## First Version Scope
 
-- Plain text or markdown notes
-- Note list and editor view
-- Create, rename, delete, and search notes
-- Autosave
-- Sync status indicator
-- Basic conflict handling when the same note changes on two devices
+- Plain text and markdown notes
+- Note list, search, duplicate, delete, and autosave
+- Markdown preview with edit, split, and preview modes
+- Find and replace inside the current note
+- Word wrap and zoom controls
+- Live sync status indicator
+- Conflict-safe saves that keep your local edit as a conflict copy if another device changed the same note first
 
 ## Likely Technical Direction
 
-This repo is currently just the starting point, but the intended build direction is:
+The app now works as:
 
-- Windows desktop app
-- Offline-first local storage
-- Cloud-backed sync service
-- Lightweight UI focused on speed and reliability
+- Windows desktop app through Electron
+- Standalone private web app through the built-in Node server
+- Local JSON storage under `LOCALAPPDATA\MyData\SyncPad`
+- Live update channel using Server-Sent Events
+- Optional private access over a Tailscale IP instead of `127.0.0.1`
 
 ## Non-Goals For The First Version
 
-- Browser-first experience
-- Team collaboration
-- Rich document formatting
+- Public internet exposure
+- Multi-user collaboration
+- Rich document layout or office-style formatting
 - Complex workspace/project management
 - Feature bloat
 
 ## Current Status
 
-- Desktop Electron scaffold is in place
+- Desktop Electron shell is working
+- Private web client is working
 - Local note storage works through a JSON store under `LOCALAPPDATA\MyData\SyncPad`
-- Note list, search, create, duplicate, delete, and autosave are implemented
-- Backup export and import are now built into the desktop UI
-- The app reopens the last active note and shows live word/character counts
-- Cloud sync is still the next major phase
+- Note list, search, create, duplicate, delete, autosave, export, and import are implemented
+- Markdown preview, find/replace, wrap toggle, zoom controls, and live word/character counts are implemented
+- Private live sync works when the app is hosted on `127.0.0.1` for one machine or on your Tailscale IP for your own devices
 
 ## Next Steps
 
-1. Refine the local note experience and keyboard shortcuts
-2. Decide the first sync backend
-3. Add device-to-device sync
-4. Add conflict handling and sync recovery
-5. Add polish such as markdown preview only if it still feels lightweight
+1. Add richer note history and recovery tools
+2. Improve same-note conflict handling further if needed
+3. Add optional pinned notes or tabs if the day-to-day workflow wants them
+4. Add optional direct file import or export beyond JSON backup
+5. Keep polishing the private-network hosting workflow
 
 ## Positioning
 
 SyncPad is meant to be the simplest possible answer to:
 
-"I want my notes to feel local and instant, but I also want them available on all my Windows machines."
+"I want my notes to feel local and instant, but I also want them available on all my own machines."
+
+## Current Sync Model
+
+`SyncPad` is now live-sync, but it is not a Google Docs-style collaborative editor.
+
+- One running SyncPad instance hosts the note store
+- Other devices connect to that private server
+- Changes refresh almost immediately
+- If two devices change the same note at the same time, SyncPad keeps your local edit as a `conflict copy` instead of silently overwriting it
+
+That keeps your work safe while staying lightweight.
+
+## Private Network Use
+
+For one machine only:
+
+- run on `127.0.0.1`
+
+For your own devices over Tailscale:
+
+- run on your Tailscale IP such as `100.119.231.37`
+- open `http://100.119.231.37:3210/` on the other device
+
+No `0.0.0.0` setup is required.
 
 ## Repo Layout
 
-- `src/main.js` - Electron main process
+- `src/main.js` - Electron main process and embedded private server bootstrap
+- `src/server.js` - private note server and live update endpoints
 - `src/preload.js` - safe renderer bridge
 - `src/store.js` - local note storage
-- `src/renderer/` - desktop UI
+- `src/renderer/` - browser and desktop UI
 - `scripts/smoke-store.js` - quick storage smoke test
+- `scripts/smoke-server.js` - private server smoke test
+- `start-tailscale.cmd` - starts SyncPad on your current Tailscale IP
 - `SETUP.md` - install and run notes
 - `ARCHITECTURE.md` - storage and app shape

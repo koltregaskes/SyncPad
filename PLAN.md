@@ -17,7 +17,7 @@
 
 ## Phase 3
 
-- Cloud sync
-- Device linking
-- Background reconciliation
-- Sync history and recovery tools
+- Private live sync over the user's own network
+- Better recovery tools and note history
+- Optional pinned notes or tabs
+- Further polish for same-note conflict handling
