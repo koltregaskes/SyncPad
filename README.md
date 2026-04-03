@@ -125,6 +125,17 @@ After that, the other machine behaves like a dedicated SyncPad client.
 
 Fresh installs now default to `Client` mode, which is the safer setup for every machine except the always-on host.
 
+## Reboot Cleanup Helper
+
+If Windows leaves the packaged `win-unpacked` folder locked after a build, run:
+
+`scripts\cleanup-packaging-lock-on-reboot.cmd`
+
+That queues a one-time cleanup for your next sign-in after reboot and removes:
+
+- `dist\win-unpacked`
+- `dist-final\win-unpacked`
+
 ## Repo Layout
 
 - `src/main.js` - Electron main process and embedded private server bootstrap

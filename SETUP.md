@@ -76,6 +76,14 @@ This now produces:
 - `dist\SyncPad-0.3.0-installer-x64.exe`
 - `dist\SyncPad-0.3.0-portable-x64.exe`
 
+If Windows leaves `win-unpacked` locked after packaging, run:
+
+```cmd
+scripts\cleanup-packaging-lock-on-reboot.cmd
+```
+
+Then reboot and sign in once to let Windows clear the folder automatically.
+
 ## Verify
 
 ```powershell
