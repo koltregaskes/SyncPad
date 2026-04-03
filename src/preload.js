@@ -1,6 +1,8 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("syncPad", {
+  exportBackup: () => ipcRenderer.invoke("backup:export"),
+  importBackup: () => ipcRenderer.invoke("backup:import"),
   createNote: (title) => ipcRenderer.invoke("notes:create", title),
   deleteNote: (noteId) => ipcRenderer.invoke("notes:delete", noteId),
   duplicateNote: (noteId) => ipcRenderer.invoke("notes:duplicate", noteId),

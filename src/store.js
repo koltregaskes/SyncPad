@@ -61,6 +61,32 @@ function sortNotes(notes) {
   return [...notes].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
+function normaliseNote(note) {
+  if (!note || typeof note !== "object") {
+    return null;
+  }
+
+  const now = new Date().toISOString();
+  const title = typeof note.title === "string" && note.title.trim()
+    ? note.title.trim()
+    : "Untitled note";
+  const content = typeof note.content === "string" ? note.content : "";
+  const createdAt = typeof note.createdAt === "string" && note.createdAt
+    ? note.createdAt
+    : now;
+  const updatedAt = typeof note.updatedAt === "string" && note.updatedAt
+    ? note.updatedAt
+    : createdAt;
+
+  return {
+    id: typeof note.id === "string" && note.id ? note.id : randomUUID(),
+    title,
+    content,
+    createdAt,
+    updatedAt
+  };
+}
+
 async function listNotes() {
   const state = await loadState();
   return sortNotes(state.notes);
@@ -156,13 +182,68 @@ async function deleteNote(noteId) {
   return true;
 }
 
+async function exportBackup() {
+  const state = await loadState();
+  return {
+    exportedAt: new Date().toISOString(),
+    noteCount: state.notes.length,
+    lastOpenNoteId: state.lastOpenNoteId || null,
+    notes: sortNotes(state.notes).map((note) => ({ ...note }))
+  };
+}
+
+async function importBackup(payload) {
+  const importedNotes = Array.isArray(payload?.notes)
+    ? payload.notes.map(normaliseNote).filter(Boolean)
+    : [];
+
+  if (!importedNotes.length) {
+    throw new Error("Backup does not contain any notes");
+  }
+
+  const state = await loadState();
+  const merged = new Map();
+
+  for (const note of state.notes.map(normaliseNote).filter(Boolean)) {
+    merged.set(note.id, note);
+  }
+
+  for (const note of importedNotes) {
+    const existing = merged.get(note.id);
+    if (!existing) {
+      merged.set(note.id, note);
+      continue;
+    }
+
+    merged.set(
+      note.id,
+      existing.updatedAt >= note.updatedAt ? existing : note
+    );
+  }
+
+  const nextState = {
+    notes: Array.from(merged.values()),
+    lastOpenNoteId: payload?.lastOpenNoteId || state.lastOpenNoteId || importedNotes[0].id
+  };
+
+  await saveState(nextState);
+
+  return {
+    imported: importedNotes.length,
+    total: nextState.notes.length,
+    lastOpenNoteId: nextState.lastOpenNoteId
+  };
+}
+
 module.exports = {
   createNote,
   deleteNote,
   duplicateNote,
+  exportBackup,
   getNote,
   getStatus,
   getStoreFile,
+  importBackup,
   listNotes,
   loadState,
   saveNote

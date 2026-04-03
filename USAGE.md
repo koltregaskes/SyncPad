@@ -12,8 +12,17 @@
 - Create notes
 - Rename notes by editing the first line or note title
 - Search notes from the sidebar
+- Duplicate the current note when you want a quick variation
 - Delete notes you no longer need
+- Export a backup from the sidebar when you want a portable copy
+- Import a backup to merge notes back into this machine
 - Keep working locally even before cloud sync exists
+
+## Shortcuts
+
+- `Ctrl/Cmd + N` creates a new note
+- `Ctrl/Cmd + D` duplicates the current note
+- `Ctrl/Cmd + S` saves immediately
 
 ## Current Limitations
 

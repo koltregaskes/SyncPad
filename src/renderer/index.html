@@ -17,6 +17,11 @@
           <button id="new-note-button" class="primary-button">New Note</button>
         </div>
 
+        <div class="sidebar-actions">
+          <button id="export-backup-button" class="ghost-button">Export Backup</button>
+          <button id="import-backup-button" class="ghost-button">Import Backup</button>
+        </div>
+
         <label class="search-shell">
           <span>Search</span>
           <input id="search-input" type="search" placeholder="Search notes" />
@@ -50,7 +55,10 @@
 
         <footer class="editor-footer">
           <span id="save-state">No note selected</span>
-          <span id="storage-path"></span>
+          <div class="footer-meta">
+            <span id="note-stats">0 words · 0 characters</span>
+            <span id="storage-path"></span>
+          </div>
         </footer>
       </main>
     </div>

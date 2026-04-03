@@ -50,7 +50,9 @@ This repo is currently just the starting point, but the intended build direction
 
 - Desktop Electron scaffold is in place
 - Local note storage works through a JSON store under `LOCALAPPDATA\MyData\SyncPad`
-- Note list, search, create, delete, and autosave are implemented
+- Note list, search, create, duplicate, delete, and autosave are implemented
+- Backup export and import are now built into the desktop UI
+- The app reopens the last active note and shows live word/character counts
 - Cloud sync is still the next major phase
 
 ## Next Steps

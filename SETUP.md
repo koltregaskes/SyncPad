@@ -18,6 +18,13 @@ npm.cmd install
 npm.cmd start
 ```
 
+## Verify
+
+```powershell
+npm.cmd run check
+npm.cmd run smoke-store
+```
+
 ## Local Data
 
 By default, SyncPad stores notes in:

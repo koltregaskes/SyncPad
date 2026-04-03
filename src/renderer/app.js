@@ -10,12 +10,15 @@ const elements = {
   notesList: document.getElementById("notes-list"),
   searchInput: document.getElementById("search-input"),
   newNoteButton: document.getElementById("new-note-button"),
+  exportBackupButton: document.getElementById("export-backup-button"),
+  importBackupButton: document.getElementById("import-backup-button"),
   duplicateNoteButton: document.getElementById("duplicate-note-button"),
   deleteNoteButton: document.getElementById("delete-note-button"),
   titleInput: document.getElementById("title-input"),
   contentInput: document.getElementById("content-input"),
   editorHeading: document.getElementById("editor-heading"),
   saveState: document.getElementById("save-state"),
+  noteStats: document.getElementById("note-stats"),
   syncStatus: document.getElementById("sync-status"),
   storagePath: document.getElementById("storage-path")
 };
@@ -76,6 +79,7 @@ function renderEditor() {
     elements.titleInput.value = "";
     elements.contentInput.value = "";
     elements.saveState.textContent = "No note selected";
+    elements.noteStats.textContent = "0 words · 0 characters";
     return;
   }
 
@@ -84,6 +88,7 @@ function renderEditor() {
   elements.titleInput.value = note.title || "";
   elements.contentInput.value = note.content || "";
   elements.saveState.textContent = `Last saved ${formatTimestamp(note.updatedAt)}`;
+  updateNoteStats(note.content || "");
 }
 
 function escapeHtml(value) {
@@ -109,6 +114,13 @@ function applySearch() {
   });
 
   renderNotes();
+}
+
+function updateNoteStats(content) {
+  const trimmed = content.trim();
+  const words = trimmed ? trimmed.split(/\s+/).length : 0;
+  const characters = content.length;
+  elements.noteStats.textContent = `${words} word${words === 1 ? "" : "s"} · ${characters} character${characters === 1 ? "" : "s"}`;
 }
 
 async function refreshNotes(preferredNoteId) {
@@ -182,6 +194,7 @@ async function saveActiveNote() {
 
 function queueSave() {
   elements.saveState.textContent = "Saving soon...";
+  updateNoteStats(elements.contentInput.value);
   window.clearTimeout(state.saveTimer);
   state.saveTimer = window.setTimeout(() => {
     saveActiveNote().catch((error) => {
@@ -231,6 +244,25 @@ function handleKeyboardShortcuts(event) {
   }
 }
 
+async function exportBackup() {
+  const result = await window.syncPad.exportBackup();
+  if (result?.canceled) {
+    return;
+  }
+
+  elements.saveState.textContent = `Backup exported (${result.noteCount} notes)`;
+}
+
+async function importBackup() {
+  const result = await window.syncPad.importBackup();
+  if (result?.canceled) {
+    return;
+  }
+
+  await refreshNotes(result.lastOpenNoteId);
+  elements.saveState.textContent = `Imported ${result.imported} notes`;
+}
+
 async function bootstrap() {
   const status = await window.syncPad.getStatus();
   state.lastStatus = status;
@@ -240,6 +272,12 @@ async function bootstrap() {
   elements.searchInput.addEventListener("input", applySearch);
   elements.newNoteButton.addEventListener("click", () => {
     createNote().catch(console.error);
+  });
+  elements.exportBackupButton.addEventListener("click", () => {
+    exportBackup().catch(console.error);
+  });
+  elements.importBackupButton.addEventListener("click", () => {
+    importBackup().catch(console.error);
   });
   elements.duplicateNoteButton.addEventListener("click", () => {
     duplicateActiveNote().catch(console.error);

@@ -42,6 +42,15 @@ body {
   gap: 18px;
 }
 
+.sidebar-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.sidebar-actions .ghost-button {
+  flex: 1;
+}
+
 .sidebar-header,
 .editor-header,
 .editor-footer {
@@ -217,6 +226,15 @@ h2 {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.footer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .empty-state {

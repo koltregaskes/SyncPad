@@ -10,6 +10,12 @@
 - Run `npm.cmd run smoke-store`
 - Check that the local data directory is writable
 
+## Backup import issues
+
+- Make sure you are importing a SyncPad JSON backup file
+- Imported notes merge with local notes and keep the newer version when IDs match
+- If nothing imports, open the file and confirm it contains a `notes` array
+
 ## Local data path
 
 SyncPad stores notes by default in:
