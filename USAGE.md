@@ -3,10 +3,11 @@
 ## First Run
 
 1. Start the app.
-2. Create a new note from the sidebar.
-3. Type straight into the editor.
-4. Watch autosave finish in the footer.
-5. If you are using Tailscale hosting, open the same URL on another device and you should see the same note list update.
+2. Open `Settings` if you want to switch between `Host this library` and `Connect to a host`.
+3. Create a new note from the sidebar.
+4. Type straight into the editor.
+5. Watch autosave finish in the footer.
+6. If you are using Tailscale hosting, open the same URL on another device and you should see the same note list update.
 
 ## Main Actions
 
@@ -23,6 +24,7 @@
 - Import a backup to merge notes back into this machine
 - Keep working locally even if no other device is connected
 - Share the same live note space across your own machines by hosting SyncPad on your Tailscale IP
+- Use the desktop app menu to copy the host address or reopen the settings panel
 
 ## Shortcuts
 
@@ -39,6 +41,15 @@
 2. Leave that host running.
 3. Open `http://100.119.231.37:3210/` on the other device.
 4. Edit on one device and the others will refresh almost immediately.
+
+## Install On Another Windows Machine
+
+1. Use the installer or portable app built from `dist`.
+2. Open SyncPad.
+3. Go to `Settings`.
+4. Choose `Connect to a host`.
+5. Enter `http://100.119.231.37:3210/`.
+6. Save and start using the shared note library.
 
 ## Current Limitations
 

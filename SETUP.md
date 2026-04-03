@@ -18,7 +18,12 @@ npm.cmd install
 npm.cmd start
 ```
 
-This starts the Electron app and the embedded SyncPad server together.
+This starts the Electron app using the saved SyncPad config.
+
+If the app is in:
+
+- `Host` mode, it starts the private server and the desktop app
+- `Client` mode, it opens the desktop app and connects to the saved host
 
 ## Run The Private Web App Only
 
@@ -26,7 +31,15 @@ This starts the Electron app and the embedded SyncPad server together.
 npm.cmd run serve
 ```
 
-That keeps SyncPad browser-based and local to this machine on `127.0.0.1:3210` by default.
+That keeps SyncPad browser-based and uses the saved SyncPad config by default.
+
+## Start The Always-On Host
+
+```cmd
+start-host.cmd
+```
+
+That starts the SyncPad host server using the saved config file, which is the simplest setup for your always-on host machine.
 
 ## Run Over Tailscale
 
@@ -49,6 +62,17 @@ Then open:
 `http://100.119.231.37:3210/`
 
 from your other Windows machine or iPad while the app stays running.
+
+## Build The Windows App
+
+```powershell
+npm.cmd run dist:win
+```
+
+This now produces:
+
+- `dist\SyncPad-0.3.0-installer-x64.exe`
+- `dist\SyncPad-0.3.0-portable-x64.exe`
 
 ## Verify
 

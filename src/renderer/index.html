@@ -15,7 +15,10 @@
             <h1>Notes</h1>
             <p class="header-hint">Private live notes across your devices.</p>
           </div>
-          <button id="new-note-button" class="primary-button">New note</button>
+          <div class="sidebar-top-actions">
+            <button id="settings-button" class="ghost-button ghost-button--small">Settings</button>
+            <button id="new-note-button" class="primary-button">New note</button>
+          </div>
         </div>
 
         <div class="sidebar-actions">
@@ -102,6 +105,57 @@
           </div>
         </footer>
       </main>
+    </div>
+
+    <div id="settings-modal" class="settings-modal" hidden>
+      <div id="settings-backdrop" class="settings-backdrop"></div>
+      <section class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div class="settings-header">
+          <div>
+            <p class="eyebrow">SyncPad Setup</p>
+            <h3 id="settings-title">Host and client configuration</h3>
+            <p class="header-hint">Use host mode on this always-on machine, or client mode on another Windows machine.</p>
+          </div>
+          <button id="settings-close-button" class="ghost-button ghost-button--small">Close</button>
+        </div>
+
+        <div class="settings-grid">
+          <label class="toolbar-field">
+            <span>Mode</span>
+            <select id="settings-mode">
+              <option value="host">Host this library</option>
+              <option value="client">Connect to a host</option>
+            </select>
+          </label>
+
+          <label class="toolbar-field">
+            <span>Host bind IP</span>
+            <input id="settings-host" type="text" placeholder="100.119.231.37" />
+          </label>
+
+          <label class="toolbar-field">
+            <span>Port</span>
+            <input id="settings-port" type="number" min="1" max="65535" placeholder="3210" />
+          </label>
+
+          <label class="toolbar-field settings-grid__wide">
+            <span>Client address</span>
+            <input id="settings-remote-origin" type="text" placeholder="http://100.119.231.37:3210" />
+          </label>
+        </div>
+
+        <div class="settings-summary">
+          <p id="settings-summary-text">Host mode lets this machine serve notes to your own devices.</p>
+          <p><strong>Config file:</strong> <span id="settings-config-file"></span></p>
+          <p><strong>Access address:</strong> <span id="settings-access-url"></span></p>
+        </div>
+
+        <div class="settings-actions">
+          <button id="settings-copy-button" class="ghost-button">Copy address</button>
+          <button id="settings-open-button" class="ghost-button">Open in browser</button>
+          <button id="settings-save-button" class="primary-button">Save and apply</button>
+        </div>
+      </section>
     </div>
 
     <script src="./app.js"></script>

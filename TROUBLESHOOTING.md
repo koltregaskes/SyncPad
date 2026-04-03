@@ -15,6 +15,7 @@
 ## Another device cannot reach SyncPad
 
 - Confirm you started SyncPad on your Tailscale IP, not only on `127.0.0.1`
+- `start-host.cmd` is the simplest way to do that on the host machine
 - Confirm the host machine is still running SyncPad
 - Open the exact URL shown by SyncPad, for example `http://100.119.231.37:3210/`
 - Confirm Tailscale is connected on both devices
@@ -38,6 +39,12 @@ You can override that root with `MYDATA_DIR`.
 - Close any stuck Electron processes
 - Start the app again with `npm.cmd start`
 - SyncPad already disables hardware acceleration to avoid the GPU launch crash seen on some Windows machines
+- If you only need the host server, use `start-host.cmd` instead of the full desktop app
+
+## Windows build issues
+
+- The Windows installer build now works on this machine with `signAndEditExecutable` disabled
+- If you rebuild and get a code-signing or symlink error again, re-run `npm.cmd run dist:win` from this repo after dependencies are installed
 
 ## A note changed on another device while I was typing
 

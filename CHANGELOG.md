@@ -25,3 +25,6 @@
 - Added Tailscale-friendly hosting support
 - Added conflict-safe saves that preserve local edits as conflict copies
 - Added server smoke testing and a Tailscale launch helper
+- Added saved host/client app configuration
+- Added a settings panel and desktop app menu for setup
+- Added Windows installer and portable build output

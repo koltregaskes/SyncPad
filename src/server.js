@@ -4,10 +4,12 @@ const path = require("path");
 const { URL } = require("url");
 
 const store = require("./store");
+const { readConfigSync } = require("./config");
 
 const CLIENT_ROOT = path.join(__dirname, "renderer");
-const DEFAULT_HOST = process.env.SYNC_PAD_HOST || "127.0.0.1";
-const DEFAULT_PORT = Number(process.env.SYNC_PAD_PORT || 3210);
+const savedConfig = readConfigSync();
+const DEFAULT_HOST = process.env.SYNC_PAD_HOST || savedConfig.host || "127.0.0.1";
+const DEFAULT_PORT = Number(process.env.SYNC_PAD_PORT || savedConfig.port || 3210);
 
 const CONTENT_TYPES = {
   ".css": "text/css; charset=utf-8",

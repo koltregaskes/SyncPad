@@ -6,6 +6,7 @@ The current implementation has two front doors over one shared store:
 
 - Electron desktop shell
 - Private web client served by a small Node HTTP server
+- Host/client configuration stored in a local config file
 - Local JSON storage under `LOCALAPPDATA\MyData\SyncPad`
 - Server-Sent Events for live note refresh across connected devices
 
@@ -49,6 +50,13 @@ By default the server binds to:
 but it can instead bind to a Tailscale IP such as:
 
 - `100.119.231.37:3210`
+
+`src/config.js` stores:
+
+- whether this machine is the `host` or a `client`
+- the bind IP
+- the port
+- the remote host origin for client machines
 
 ## Why This Direction
 

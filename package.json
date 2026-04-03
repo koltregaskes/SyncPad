@@ -6,9 +6,11 @@
   "scripts": {
     "start": "electron .",
     "serve": "node src/server.js",
-    "check": "node --check src/main.js && node --check src/preload.js && node --check src/server.js && node --check src/store.js && node --check src/renderer/app.js",
+    "check": "node --check src/config.js && node --check src/main.js && node --check src/preload.js && node --check src/server.js && node --check src/store.js && node --check src/renderer/app.js",
     "smoke-store": "node scripts/smoke-store.js",
-    "smoke-server": "node scripts/smoke-server.js"
+    "smoke-server": "node scripts/smoke-server.js",
+    "dist:win": "electron-builder --win nsis portable",
+    "pack:dir": "electron-builder --dir"
   },
   "keywords": [
     "notes",
@@ -19,6 +21,46 @@
   "author": "koltregaskes",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^35.0.0"
+    "electron": "^35.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.koltregaskes.syncpad",
+    "productName": "SyncPad",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "scripts/**/*",
+      "package.json",
+      "package-lock.json",
+      "README.md",
+      "SETUP.md",
+      "USAGE.md",
+      "TROUBLESHOOTING.md",
+      "ARCHITECTURE.md",
+      "PLAN.md",
+      "CHANGELOG.md",
+      "start-tailscale.cmd"
+    ],
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SyncPad",
+      "artifactName": "SyncPad-${version}-installer-${arch}.${ext}"
+    },
+    "portable": {
+      "artifactName": "SyncPad-${version}-portable-${arch}.${ext}"
+    }
   }
 }

@@ -10,13 +10,18 @@ const state = {
   syncLabel: "Local-only server",
   serverTone: "local",
   wordWrap: true,
-  zoomLevel: 1
+  zoomLevel: 1,
+  appStatus: null,
+  config: null
 };
+
+const syncPadDesktop = window.syncPad || null;
 
 const elements = {
   notesList: document.getElementById("notes-list"),
   searchInput: document.getElementById("search-input"),
   newNoteButton: document.getElementById("new-note-button"),
+  settingsButton: document.getElementById("settings-button"),
   exportBackupButton: document.getElementById("export-backup-button"),
   importBackupButton: document.getElementById("import-backup-button"),
   importBackupInput: document.getElementById("import-backup-input"),
@@ -43,7 +48,20 @@ const elements = {
   storagePath: document.getElementById("storage-path"),
   serverOrigin: document.getElementById("server-origin"),
   editorShell: document.getElementById("editor-shell"),
-  modeButtons: Array.from(document.querySelectorAll("[data-mode]"))
+  modeButtons: Array.from(document.querySelectorAll("[data-mode]")),
+  settingsModal: document.getElementById("settings-modal"),
+  settingsBackdrop: document.getElementById("settings-backdrop"),
+  settingsCloseButton: document.getElementById("settings-close-button"),
+  settingsMode: document.getElementById("settings-mode"),
+  settingsHost: document.getElementById("settings-host"),
+  settingsPort: document.getElementById("settings-port"),
+  settingsRemoteOrigin: document.getElementById("settings-remote-origin"),
+  settingsSummaryText: document.getElementById("settings-summary-text"),
+  settingsConfigFile: document.getElementById("settings-config-file"),
+  settingsAccessUrl: document.getElementById("settings-access-url"),
+  settingsCopyButton: document.getElementById("settings-copy-button"),
+  settingsOpenButton: document.getElementById("settings-open-button"),
+  settingsSaveButton: document.getElementById("settings-save-button")
 };
 
 const PREFERENCES_KEY = "syncpad:preferences";
@@ -88,6 +106,28 @@ function formatTimestamp(value) {
 
 function getActiveNote() {
   return state.notes.find((note) => note.id === state.activeNoteId) || null;
+}
+
+function buildOrigin(host, port) {
+  return `http://${host}:${port}`;
+}
+
+async function copyText(value) {
+  if (syncPadDesktop?.copyText) {
+    await syncPadDesktop.copyText(value);
+    return;
+  }
+
+  await navigator.clipboard.writeText(String(value || ""));
+}
+
+async function openExternal(url) {
+  if (syncPadDesktop?.openExternal) {
+    await syncPadDesktop.openExternal(url);
+    return;
+  }
+
+  window.open(url, "_blank", "noopener,noreferrer");
 }
 
 async function apiFetch(path, options = {}) {
@@ -592,6 +632,67 @@ function toggleWordWrap() {
   savePreferences();
 }
 
+function openSettingsModal() {
+  if (!syncPadDesktop) {
+    return;
+  }
+
+  hydrateSettingsForm();
+  elements.settingsModal.hidden = false;
+}
+
+function closeSettingsModal() {
+  elements.settingsModal.hidden = true;
+}
+
+function hydrateSettingsForm() {
+  const config = state.config;
+  if (!config) {
+    return;
+  }
+
+  elements.settingsMode.value = config.mode;
+  elements.settingsHost.value = config.host;
+  elements.settingsPort.value = String(config.port);
+  elements.settingsRemoteOrigin.value = config.remoteOrigin;
+  elements.settingsConfigFile.textContent = config.configFile || "";
+  updateSettingsSummary();
+}
+
+function updateSettingsSummary() {
+  const mode = elements.settingsMode.value;
+  const host = (elements.settingsHost.value || "").trim() || "127.0.0.1";
+  const port = Number(elements.settingsPort.value || "3210") || 3210;
+  const origin = (elements.settingsRemoteOrigin.value || "").trim() || buildOrigin(host, port);
+  const accessUrl = mode === "host" ? buildOrigin(host, port) : origin;
+
+  elements.settingsAccessUrl.textContent = accessUrl;
+  elements.settingsSummaryText.textContent = mode === "host"
+    ? "Host mode turns this machine into the always-on SyncPad library for your own devices."
+    : "Client mode keeps this machine simple and just connects to the always-on host.";
+  elements.settingsHost.disabled = mode !== "host";
+  elements.settingsPort.disabled = mode !== "host";
+}
+
+async function saveSettings() {
+  if (!syncPadDesktop) {
+    return;
+  }
+
+  const updates = {
+    mode: elements.settingsMode.value,
+    host: elements.settingsHost.value.trim(),
+    port: Number(elements.settingsPort.value || "3210"),
+    remoteOrigin: elements.settingsRemoteOrigin.value.trim()
+  };
+
+  const saved = await syncPadDesktop.saveConfig(updates);
+  state.config = saved;
+  state.syncLabel = saved.mode === "host" ? "Private Tailscale sync app" : "Remote SyncPad client";
+  state.serverTone = saved.mode === "host" ? "connected" : "local";
+  closeSettingsModal();
+}
+
 function handleKeyboardShortcuts(event) {
   const modifierPressed = event.ctrlKey || event.metaKey;
   if (!modifierPressed) {
@@ -639,7 +740,7 @@ function handleKeyboardShortcuts(event) {
     return;
   }
 
-  if ((event.key === "+" || event.key === "=") && !event.shiftKey) {
+  if (event.key === "+" || event.key === "=") {
     event.preventDefault();
     setZoom(state.zoomLevel + 0.1);
     return;
@@ -687,9 +788,24 @@ function setupLiveSync() {
   });
 }
 
+async function bootstrapDesktopSettings() {
+  if (!syncPadDesktop) {
+    elements.settingsButton.hidden = true;
+    return;
+  }
+
+  state.config = await syncPadDesktop.getConfig();
+  syncPadDesktop.onOpenSettings(() => {
+    openSettingsModal();
+  });
+}
+
 async function bootstrap() {
   loadPreferences();
+  await bootstrapDesktopSettings();
+
   const status = await apiFetch("/api/status");
+  state.appStatus = status;
   elements.storagePath.textContent = status.storageFile;
   elements.serverOrigin.textContent = status.origin;
   state.syncLabel = status.sync;
@@ -700,6 +816,9 @@ async function bootstrap() {
   elements.searchInput.addEventListener("input", applySearch);
   elements.newNoteButton.addEventListener("click", () => {
     createNote().catch(console.error);
+  });
+  elements.settingsButton.addEventListener("click", () => {
+    openSettingsModal();
   });
   elements.exportBackupButton.addEventListener("click", () => {
     exportBackup().catch(console.error);
@@ -757,7 +876,31 @@ async function bootstrap() {
   elements.zoomInButton.addEventListener("click", () => {
     setZoom(state.zoomLevel + 0.1);
   });
-  window.addEventListener("keydown", handleKeyboardShortcuts);
+  elements.settingsBackdrop.addEventListener("click", closeSettingsModal);
+  elements.settingsCloseButton.addEventListener("click", closeSettingsModal);
+  elements.settingsMode.addEventListener("change", updateSettingsSummary);
+  elements.settingsHost.addEventListener("input", updateSettingsSummary);
+  elements.settingsPort.addEventListener("input", updateSettingsSummary);
+  elements.settingsRemoteOrigin.addEventListener("input", updateSettingsSummary);
+  elements.settingsCopyButton.addEventListener("click", () => {
+    copyText(elements.settingsAccessUrl.textContent).catch(console.error);
+  });
+  elements.settingsOpenButton.addEventListener("click", () => {
+    openExternal(elements.settingsAccessUrl.textContent).catch(console.error);
+  });
+  elements.settingsSaveButton.addEventListener("click", () => {
+    saveSettings().catch((error) => {
+      console.error(error);
+      updateSyncStatus("Settings save failed", "error");
+    });
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !elements.settingsModal.hidden) {
+      closeSettingsModal();
+      return;
+    }
+    handleKeyboardShortcuts(event);
+  });
 
   for (const button of elements.modeButtons) {
     button.addEventListener("click", () => setMode(button.dataset.mode));
