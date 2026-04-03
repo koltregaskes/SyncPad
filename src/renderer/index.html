@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SyncPad</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div>
+            <p class="eyebrow">SyncPad</p>
+            <h1>Notes</h1>
+          </div>
+          <button id="new-note-button" class="primary-button">New Note</button>
+        </div>
+
+        <label class="search-shell">
+          <span>Search</span>
+          <input id="search-input" type="search" placeholder="Search notes" />
+        </label>
+
+        <div id="notes-list" class="notes-list"></div>
+      </aside>
+
+      <main class="editor-shell">
+        <header class="editor-header">
+          <div>
+            <p id="sync-status" class="eyebrow">Local only</p>
+            <h2 id="editor-heading">Select or create a note</h2>
+          </div>
+          <button id="delete-note-button" class="ghost-button" disabled>Delete</button>
+        </header>
+
+        <section class="editor-panel">
+          <input id="title-input" class="title-input" type="text" placeholder="Untitled note" disabled />
+          <textarea
+            id="content-input"
+            class="content-input"
+            placeholder="Start typing..."
+            disabled
+          ></textarea>
+        </section>
+
+        <footer class="editor-footer">
+          <span id="save-state">No note selected</span>
+          <span id="storage-path"></span>
+        </footer>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
