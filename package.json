@@ -19,7 +19,8 @@
     "sync"
   ],
   "author": "koltregaskes",
-  "license": "MIT",
+  "private": true,
+  "license": "UNLICENSED",
   "devDependencies": {
     "electron": "^35.0.0",
     "electron-builder": "^24.13.3"
