@@ -49,7 +49,7 @@ By default the server binds to:
 
 but it can instead bind to a Tailscale IP such as:
 
-- `100.119.231.37:3210`
+- `100.x.y.z:3210`
 
 `src/config.js` stores:
 

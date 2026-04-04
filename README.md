@@ -99,8 +99,8 @@ For one machine only:
 
 For your own devices over Tailscale:
 
-- run on your Tailscale IP such as `100.119.231.37`
-- open `http://100.119.231.37:3210/` on the other device
+- run on your own Tailscale IP such as `100.x.y.z`
+- open `http://YOUR-TAILSCALE-IP:3210/` on the other device
 
 No `0.0.0.0` setup is required.
 
@@ -120,7 +120,7 @@ The easiest client setup path now is:
 1. Install the Windows build on the other machine
 2. Open `Settings`
 3. Choose `Connect to a host`
-4. Use `http://100.119.231.37:3210/`
+4. Use your host address such as `http://YOUR-TAILSCALE-IP:3210/`
 5. Save and reopen if needed
 
 After that, the other machine behaves like a dedicated SyncPad client.

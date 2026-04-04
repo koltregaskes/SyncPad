@@ -48,7 +48,7 @@ That starts the SyncPad host server using the saved config file, which is the si
 To make SyncPad available on your own devices over Tailscale:
 
 ```powershell
-$env:SYNC_PAD_HOST="100.119.231.37"
+$env:SYNC_PAD_HOST="YOUR-TAILSCALE-IP"
 $env:SYNC_PAD_PORT="3210"
 npm.cmd start
 ```
@@ -61,7 +61,7 @@ start-tailscale.cmd
 
 Then open:
 
-`http://100.119.231.37:3210/`
+`http://YOUR-TAILSCALE-IP:3210/`
 
 from your other Windows machine or iPad while the app stays running.
 

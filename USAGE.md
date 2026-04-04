@@ -39,7 +39,7 @@
 
 1. Run SyncPad on the host machine with your Tailscale IP.
 2. Leave that host running.
-3. Open `http://100.119.231.37:3210/` on the other device.
+3. Open `http://YOUR-TAILSCALE-IP:3210/` on the other device.
 4. Edit on one device and the others will refresh almost immediately.
 
 ## Install On Another Windows Machine
@@ -48,7 +48,7 @@
 2. Open SyncPad.
 3. It should already open in `Connect to a host` mode by default.
 4. If needed, go to `Settings`.
-5. Confirm the host address is `http://100.119.231.37:3210/`.
+5. Confirm the host address is your real SyncPad host URL, for example `http://YOUR-TAILSCALE-IP:3210/`.
 6. Save and start using the shared note library.
 
 ## Current Limitations

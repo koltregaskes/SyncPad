@@ -17,7 +17,7 @@
 - Confirm you started SyncPad on your Tailscale IP, not only on `127.0.0.1`
 - `start-host.cmd` is the simplest way to do that on the host machine
 - Confirm the host machine is still running SyncPad
-- Open the exact URL shown by SyncPad, for example `http://100.119.231.37:3210/`
+- Open the exact URL shown by SyncPad, for example `http://YOUR-TAILSCALE-IP:3210/`
 - Confirm Tailscale is connected on both devices
 
 ## Backup import issues
