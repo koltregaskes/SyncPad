@@ -72,6 +72,10 @@ const elements = {
 };
 
 const PREFERENCES_KEY = "syncpad:preferences";
+const DEFAULT_LOCAL_HOST = "127.0.0.1";
+const DEFAULT_PORT = 3210;
+const EXAMPLE_TAILSCALE_HOST = "100.x.y.z";
+const EXAMPLE_TAILSCALE_ORIGIN = `http://${EXAMPLE_TAILSCALE_HOST}:${DEFAULT_PORT}`;
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -120,9 +124,9 @@ function buildOrigin(host, port) {
 }
 
 function getEffectiveConfig() {
-  const candidateHost = String(state.config?.host || state.appStatus?.bindHost || "100.119.231.37").trim();
-  const host = candidateHost || "100.119.231.37";
-  const port = Number(state.config?.port || state.appStatus?.bindPort || 3210) || 3210;
+  const candidateHost = String(state.config?.host || state.appStatus?.bindHost || DEFAULT_LOCAL_HOST).trim();
+  const host = candidateHost || DEFAULT_LOCAL_HOST;
+  const port = Number(state.config?.port || state.appStatus?.bindPort || DEFAULT_PORT) || DEFAULT_PORT;
   const remoteOrigin = (state.config?.remoteOrigin || state.appStatus?.remoteOrigin || buildOrigin(host, port)).trim();
 
   return {
@@ -130,6 +134,19 @@ function getEffectiveConfig() {
     port,
     remoteOrigin
   };
+}
+
+function getOnboardingAddress(config) {
+  if (
+    !state.config?.setupComplete &&
+    config.host === DEFAULT_LOCAL_HOST &&
+    config.remoteOrigin === buildOrigin(DEFAULT_LOCAL_HOST, config.port)
+  ) {
+    return `${EXAMPLE_TAILSCALE_ORIGIN}/`;
+  }
+
+  const trimmedOrigin = config.remoteOrigin.replace(/\/+$/, "");
+  return `${trimmedOrigin}/`;
 }
 
 async function copyText(value) {
@@ -671,7 +688,7 @@ function openOnboardingModal() {
   }
 
   const effectiveConfig = getEffectiveConfig();
-  elements.onboardingHostAddress.textContent = effectiveConfig.remoteOrigin;
+  elements.onboardingHostAddress.textContent = getOnboardingAddress(effectiveConfig);
   elements.onboardingModal.hidden = false;
 }
 
@@ -695,8 +712,8 @@ function hydrateSettingsForm() {
 
 function updateSettingsSummary() {
   const mode = elements.settingsMode.value;
-  const host = (elements.settingsHost.value || "").trim() || "127.0.0.1";
-  const port = Number(elements.settingsPort.value || "3210") || 3210;
+  const host = (elements.settingsHost.value || "").trim() || DEFAULT_LOCAL_HOST;
+  const port = Number(elements.settingsPort.value || String(DEFAULT_PORT)) || DEFAULT_PORT;
   const origin = (elements.settingsRemoteOrigin.value || "").trim() || buildOrigin(host, port);
   const accessUrl = mode === "host" ? buildOrigin(host, port) : origin;
 

@@ -2,11 +2,14 @@ const fs = require("fs");
 const fsp = require("fs/promises");
 const path = require("path");
 
+const DEFAULT_HOST = "127.0.0.1";
+const DEFAULT_PORT = 3210;
+
 const DEFAULT_CONFIG = {
   mode: "client",
-  host: "100.119.231.37",
-  port: 3210,
-  remoteOrigin: "http://100.119.231.37:3210",
+  host: DEFAULT_HOST,
+  port: DEFAULT_PORT,
+  remoteOrigin: `http://${DEFAULT_HOST}:${DEFAULT_PORT}`,
   setupComplete: false
 };
 
@@ -37,7 +40,7 @@ function normalizeMode(value) {
 function normalizePort(value) {
   const numeric = Number(value);
   if (!Number.isInteger(numeric) || numeric < 1 || numeric > 65535) {
-    return DEFAULT_CONFIG.port;
+    return DEFAULT_PORT;
   }
 
   return numeric;
@@ -45,11 +48,11 @@ function normalizePort(value) {
 
 function normalizeHost(value) {
   if (typeof value !== "string") {
-    return DEFAULT_CONFIG.host;
+    return DEFAULT_HOST;
   }
 
   const trimmed = value.trim();
-  return trimmed || DEFAULT_CONFIG.host;
+  return trimmed || DEFAULT_HOST;
 }
 
 function normalizeOrigin(value, fallbackHost, fallbackPort) {
