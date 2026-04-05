@@ -28,6 +28,7 @@
   "build": {
     "appId": "com.koltregaskes.syncpad",
     "productName": "SyncPad",
+    "icon": "build/icon.ico",
     "directories": {
       "output": "dist"
     },
