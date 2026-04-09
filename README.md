@@ -26,6 +26,7 @@ The goal is straightforward: something that feels as quick and lightweight as No
 - No account system or public cloud is required
 - Host and client setup is saved in a local config file so you do not need to keep re-entering addresses
 - A first-run setup guide now helps each machine choose whether it should host the library or connect to it
+- Default layouts keep the editor calm and reduce friction while writing
 
 ## First Version Scope
 
@@ -152,3 +153,9 @@ That queues a one-time cleanup for your next sign-in after reboot and removes:
 - `start-host.cmd` - starts the SyncPad host server using the saved config
 - `SETUP.md` - install and run notes
 - `ARCHITECTURE.md` - storage and app shape
+
+## Local-Only Files
+
+- `.autolab/` is used for internal AutoResearch and should remain untracked
+- `.env*` files are local-only
+- `.local/` and `*.local.md` are for planning notes and are ignored
