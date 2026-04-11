@@ -26,6 +26,7 @@ If the app is in:
 - `Client` mode, it opens the desktop app and connects to the saved host
 
 Fresh installs default to `Client` mode.
+The in-app setup now highlights the shareable address and warns if the machine is still local-only on `127.0.0.1`.
 
 ## Run The Private Web App Only
 
@@ -107,3 +108,5 @@ You can override the base directory with:
 - `127.0.0.1` for one machine only
 - `100.x.x.x` Tailscale IP for your own devices
 - no `0.0.0.0` required
+
+Inside `Settings`, the share address is the one to copy to your other devices. If it still shows `127.0.0.1`, you are still in one-machine-only mode.

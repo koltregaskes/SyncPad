@@ -8,6 +8,7 @@
 4. Type straight into the editor.
 5. Watch autosave finish in the footer.
 6. If you are using Tailscale hosting, open the same URL on another device and you should see the same note list update.
+7. In `Settings`, use the highlighted share address for other devices. If it still shows `127.0.0.1`, that address is local-only.
 
 ## Main Actions
 
@@ -50,6 +51,8 @@
 4. If needed, go to `Settings`.
 5. Confirm the host address is your real SyncPad host URL, for example `http://YOUR-TAILSCALE-IP:3210/`.
 6. Save and start using the shared note library.
+
+`Settings` now warns if a client machine is still pointing at `localhost`, which helps avoid thinking another PC can connect when the address is actually local-only.
 
 ## Current Limitations
 

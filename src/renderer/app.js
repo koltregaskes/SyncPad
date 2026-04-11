@@ -56,9 +56,13 @@ const elements = {
   settingsHost: document.getElementById("settings-host"),
   settingsPort: document.getElementById("settings-port"),
   settingsRemoteOrigin: document.getElementById("settings-remote-origin"),
+  settingsModeBadge: document.getElementById("settings-mode-badge"),
   settingsSummaryText: document.getElementById("settings-summary-text"),
   settingsConfigFile: document.getElementById("settings-config-file"),
+  settingsAccessLabel: document.getElementById("settings-access-label"),
   settingsAccessUrl: document.getElementById("settings-access-url"),
+  settingsWarning: document.getElementById("settings-warning"),
+  settingsChecklist: document.getElementById("settings-checklist"),
   settingsCopyButton: document.getElementById("settings-copy-button"),
   settingsOpenButton: document.getElementById("settings-open-button"),
   settingsSaveButton: document.getElementById("settings-save-button"),
@@ -68,6 +72,8 @@ const elements = {
   onboardingHostButton: document.getElementById("onboarding-host-button"),
   onboardingClientButton: document.getElementById("onboarding-client-button"),
   onboardingOpenSettingsButton: document.getElementById("onboarding-open-settings-button"),
+  onboardingHostLabel: document.getElementById("onboarding-host-label"),
+  onboardingAdvice: document.getElementById("onboarding-advice"),
   onboardingHostAddress: document.getElementById("onboarding-host-address")
 };
 
@@ -123,11 +129,48 @@ function buildOrigin(host, port) {
   return `http://${host}:${port}`;
 }
 
+function sanitizePort(value) {
+  const numeric = Number(value);
+  if (!Number.isInteger(numeric) || numeric < 1 || numeric > 65535) {
+    return DEFAULT_PORT;
+  }
+
+  return numeric;
+}
+
+function isLoopbackHost(value) {
+  const host = String(value || "").trim().toLowerCase();
+  return host === "127.0.0.1" || host === "localhost" || host === "::1" || host === "[::1]";
+}
+
+function normalizeOriginInput(value, fallbackHost, fallbackPort) {
+  const trimmed = String(value || "").trim();
+  const candidate = trimmed
+    ? (/^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed) ? trimmed : `http://${trimmed}`)
+    : buildOrigin(fallbackHost, fallbackPort);
+
+  try {
+    const parsed = new URL(candidate);
+    const port = parsed.port || String(fallbackPort);
+    return `${parsed.protocol}//${parsed.hostname}${port ? `:${port}` : ""}`;
+  } catch (_) {
+    return candidate.replace(/\/+$/, "");
+  }
+}
+
+function getHostFromOrigin(origin) {
+  try {
+    return new URL(origin).hostname.toLowerCase();
+  } catch (_) {
+    return "";
+  }
+}
+
 function getEffectiveConfig() {
   const candidateHost = String(state.config?.host || state.appStatus?.bindHost || DEFAULT_LOCAL_HOST).trim();
   const host = candidateHost || DEFAULT_LOCAL_HOST;
-  const port = Number(state.config?.port || state.appStatus?.bindPort || DEFAULT_PORT) || DEFAULT_PORT;
-  const remoteOrigin = (state.config?.remoteOrigin || state.appStatus?.remoteOrigin || buildOrigin(host, port)).trim();
+  const port = sanitizePort(state.config?.port || state.appStatus?.bindPort || DEFAULT_PORT);
+  const remoteOrigin = normalizeOriginInput(state.config?.remoteOrigin || state.appStatus?.remoteOrigin, host, port);
 
   return {
     host,
@@ -147,6 +190,65 @@ function getOnboardingAddress(config) {
 
   const trimmedOrigin = config.remoteOrigin.replace(/\/+$/, "");
   return `${trimmedOrigin}/`;
+}
+
+function getSettingsModel() {
+  const mode = elements.settingsMode.value;
+  const host = (elements.settingsHost.value || "").trim() || DEFAULT_LOCAL_HOST;
+  const port = sanitizePort(elements.settingsPort.value || DEFAULT_PORT);
+  const hostOrigin = buildOrigin(host, port);
+  const remoteOrigin = normalizeOriginInput(elements.settingsRemoteOrigin.value, host, port);
+  const remoteHost = getHostFromOrigin(remoteOrigin);
+  const hostIsLoopback = isLoopbackHost(host);
+  const remoteIsLoopback = isLoopbackHost(remoteHost);
+
+  const checklist = mode === "host"
+    ? [
+        "Leave this machine running if other devices need the same live note library.",
+        "Share the address below with your other Windows or Android devices over Tailscale.",
+        "Only one machine should stay in Host mode for the same library."
+      ]
+    : [
+        "Keep only the always-on machine in Host mode.",
+        "Point this client at the host machine address you actually want to reach.",
+        "If another device cannot connect, double-check that the host is running on its Tailscale IP."
+      ];
+
+  let warning = "";
+  if (mode === "host" && hostIsLoopback) {
+    warning = "127.0.0.1 only works on this machine. Switch the host bind IP to your Tailscale address if other devices need to connect.";
+  } else if (mode === "client" && remoteIsLoopback) {
+    warning = "This client address points to localhost. That only works if the host is running on the same machine.";
+  }
+
+  return {
+    mode,
+    host,
+    port,
+    remoteOrigin,
+    accessUrl: mode === "host" ? hostOrigin : remoteOrigin,
+    accessLabel: mode === "host" ? "Share this address with your other devices:" : "This machine will connect to:",
+    modeBadge: mode === "host" ? "Host machine" : "Client machine",
+    summaryText: mode === "host"
+      ? "Host mode turns this machine into the always-on SyncPad library for your own devices."
+      : "Client mode keeps this machine simple and only connects to the always-on host.",
+    warning,
+    checklist
+  };
+}
+
+function updateOnboardingSummary() {
+  const effectiveConfig = getEffectiveConfig();
+  const accessAddress = getOnboardingAddress(effectiveConfig);
+  const showSuggestedAddress = !state.config?.setupComplete && isLoopbackHost(effectiveConfig.host);
+
+  elements.onboardingHostLabel.textContent = showSuggestedAddress
+    ? "Suggested shared address once your host uses Tailscale:"
+    : "Current host address:";
+  elements.onboardingHostAddress.textContent = accessAddress;
+  elements.onboardingAdvice.textContent = showSuggestedAddress
+    ? "Right now SyncPad is still local-only. Pick Host mode only on the always-on machine, then open Settings and replace the bind IP with your Tailscale address if other devices should connect."
+    : "You can change the address and other details later in Settings. This step just gives each machine a clean starting point.";
 }
 
 async function copyText(value) {
@@ -687,8 +789,7 @@ function openOnboardingModal() {
     return;
   }
 
-  const effectiveConfig = getEffectiveConfig();
-  elements.onboardingHostAddress.textContent = getOnboardingAddress(effectiveConfig);
+  updateOnboardingSummary();
   elements.onboardingModal.hidden = false;
 }
 
@@ -711,18 +812,23 @@ function hydrateSettingsForm() {
 }
 
 function updateSettingsSummary() {
-  const mode = elements.settingsMode.value;
-  const host = (elements.settingsHost.value || "").trim() || DEFAULT_LOCAL_HOST;
-  const port = Number(elements.settingsPort.value || String(DEFAULT_PORT)) || DEFAULT_PORT;
-  const origin = (elements.settingsRemoteOrigin.value || "").trim() || buildOrigin(host, port);
-  const accessUrl = mode === "host" ? buildOrigin(host, port) : origin;
-
-  elements.settingsAccessUrl.textContent = accessUrl;
-  elements.settingsSummaryText.textContent = mode === "host"
-    ? "Host mode turns this machine into the always-on SyncPad library for your own devices."
-    : "Client mode keeps this machine simple and just connects to the always-on host.";
-  elements.settingsHost.disabled = mode !== "host";
-  elements.settingsPort.disabled = mode !== "host";
+  const model = getSettingsModel();
+  elements.settingsModeBadge.textContent = model.modeBadge;
+  elements.settingsAccessLabel.textContent = model.accessLabel;
+  elements.settingsAccessUrl.textContent = model.accessUrl;
+  elements.settingsSummaryText.textContent = model.summaryText;
+  elements.settingsWarning.hidden = !model.warning;
+  elements.settingsWarning.textContent = model.warning;
+  elements.settingsChecklist.innerHTML = model.checklist
+    .map((item) => `<li>${escapeHtml(item)}</li>`)
+    .join("");
+  elements.settingsHost.disabled = model.mode !== "host";
+  elements.settingsPort.disabled = model.mode !== "host";
+  elements.settingsPort.value = String(model.port);
+  elements.settingsRemoteOrigin.placeholder = model.mode === "host"
+    ? model.accessUrl
+    : EXAMPLE_TAILSCALE_ORIGIN;
+  elements.settingsCopyButton.textContent = model.mode === "host" ? "Copy share address" : "Copy host address";
 }
 
 async function saveSettings() {
@@ -730,11 +836,12 @@ async function saveSettings() {
     return;
   }
 
+  const model = getSettingsModel();
   const updates = {
-    mode: elements.settingsMode.value,
-    host: elements.settingsHost.value.trim(),
-    port: Number(elements.settingsPort.value || "3210"),
-    remoteOrigin: elements.settingsRemoteOrigin.value.trim(),
+    mode: model.mode,
+    host: model.host,
+    port: model.port,
+    remoteOrigin: model.mode === "host" ? buildOrigin(model.host, model.port) : model.remoteOrigin,
     setupComplete: true
   };
 
@@ -756,7 +863,9 @@ async function completeOnboarding(mode) {
     mode,
     host: effectiveConfig.host,
     port: effectiveConfig.port,
-    remoteOrigin: effectiveConfig.remoteOrigin,
+    remoteOrigin: mode === "host"
+      ? buildOrigin(effectiveConfig.host, effectiveConfig.port)
+      : effectiveConfig.remoteOrigin,
     setupComplete: true
   };
 

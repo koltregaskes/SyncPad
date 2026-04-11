@@ -66,6 +66,7 @@ The app now works as:
 - Private live sync works when the app is hosted on `127.0.0.1` for one machine or on your Tailscale IP for your own devices
 - A saved host/client setup screen is built into the desktop app
 - A first-run host/client choice now appears in the desktop app for easier setup on new machines
+- The setup screen now makes it explicit when an address is local-only and which address should be shared with other devices
 - Windows packaging now produces an installer and a portable app build
 
 ## Next Steps
@@ -128,6 +129,7 @@ The easiest client setup path now is:
 After that, the other machine behaves like a dedicated SyncPad client.
 
 Fresh installs now default to `Client` mode, which is the safer setup for every machine except the always-on host.
+If Settings still shows `127.0.0.1`, that machine is local-only until you replace it with the host machine Tailscale address.
 
 ## Reboot Cleanup Helper
 

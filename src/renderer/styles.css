@@ -497,6 +497,43 @@ p {
   color: var(--text);
 }
 
+.settings-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(110, 231, 183, 0.24);
+  background: rgba(110, 231, 183, 0.12);
+  color: #d1fae5;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.settings-warning {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(251, 191, 36, 0.24);
+  background: rgba(251, 191, 36, 0.08);
+  color: #fde68a;
+}
+
+.settings-checklist {
+  margin: 14px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.settings-checklist li {
+  color: var(--text);
+}
+
+.settings-checklist li::marker {
+  color: var(--accent);
+}
+
 .onboarding-choices {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
