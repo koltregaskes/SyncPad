@@ -14,6 +14,12 @@ const store = require("./store");
 const { readConfig, writeConfig, getConfigFile } = require("./config");
 const { createSyncPadServer, getClientOrigin } = require("./server");
 
+// Electron 35 can still attempt GPU utility startup on some Windows machines
+// even after hardware acceleration is disabled. Force the safer software-free
+// path before app ready so the desktop shell starts reliably.
+app.commandLine.appendSwitch("disable-gpu");
+app.commandLine.appendSwitch("disable-software-rasterizer");
+app.commandLine.appendSwitch("in-process-gpu");
 app.disableHardwareAcceleration();
 
 let embeddedServerHandle = null;
